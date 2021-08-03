@@ -1,0 +1,24 @@
+{
+  "name": "centra_dex_backend",
+  "version": "1.0.0",
+  "description": "Off-Chain matching engine and order book for CentraDEX",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/maseDevelop/Centra-DEX-Backend.git"
+  },
+  "keywords": [
+    "Blockchain",
+    "Matching-Engine",
+    "Order-Book"
+  ],
+  "author": "Mason Elliott",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/maseDevelop/Centra-DEX-Backend/issues"
+  },
+  "homepage": "https://github.com/maseDevelop/Centra-DEX-Backend#readme"
+}
