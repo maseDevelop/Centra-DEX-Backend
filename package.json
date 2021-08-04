@@ -4,7 +4,8 @@
   "description": "Off-Chain matching engine and order book for CentraDEX",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+      "test": "echo \"Error: no test specified\" && exit 1",
+      "start": "nodemon server.js"
   },
   "repository": {
     "type": "git",
@@ -20,5 +21,12 @@
   "bugs": {
     "url": "https://github.com/maseDevelop/Centra-DEX-Backend/issues"
   },
-  "homepage": "https://github.com/maseDevelop/Centra-DEX-Backend#readme"
+  "homepage": "https://github.com/maseDevelop/Centra-DEX-Backend#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "socket.io": "^4.1.3"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.12"
+  }
 }
