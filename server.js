@@ -1,19 +1,11 @@
 const io = require('socket.io')(3000);
-const { createAdapter } = require("@socket.io/postgres-adapter");
-const { Pool } = require("pg");
 const Contract = require('./Contracts');
 const Provider = require('./Provider');
+const {changeUserBalance} = require('./queries');
 const fs = require('fs');
 require('dotenv').config();
 
-//Database setup
-const pool = new Pool({
-  user: "postgres",
-  host: "localhost",
-  database: "postgres",
-  password: "changeit",
-  port: 5432,
-});
+
 
 //Contract setup
 const ABI = JSON.parse(fs.readFileSync('../on_chain_exchange/build/contracts/MatchingEngine.json', 'utf8')).abi;
@@ -25,7 +17,10 @@ const contract = new Contract(ABI,ADDRESS).initContract();//Exchange contract
 //Adding contract event listeners
 contract.events.Deposit()
 .on('data', (event) => {
-    console.log('data11',event);
+  console.log('data11',event.returnValues);
+  changeUserBalance(event.returnValues.user,
+    event.returnValues.token,
+    event.returnValues.balance);
 })
 .on('connected', (subscriptionId) =>{
   console.log("Subscribed to event Deposit: ",subscriptionId);
