@@ -1,29 +1,43 @@
 const io = require('socket.io')(3000);
+const { createAdapter } = require("@socket.io/postgres-adapter");
+const { Pool } = require("pg");
 const Contract = require('./Contracts');
 const Provider = require('./Provider');
 const fs = require('fs');
 require('dotenv').config();
 
+//Database setup
+const pool = new Pool({
+  user: "postgres",
+  host: "localhost",
+  database: "postgres",
+  password: "changeit",
+  port: 5432,
+});
 
+//Contract setup
 const ABI = JSON.parse(fs.readFileSync('../on_chain_exchange/build/contracts/MatchingEngine.json', 'utf8')).abi;
 const ADDRESS = process.env.EXCHANGECONTRACT;//Exchange contract address
-
-console.log(ADDRESS);
-
-const contract = new Contract(ABI,ADDRESS);
-const instance = contract.initContract()
+const contract = new Contract(ABI,ADDRESS).initContract();//Exchange contract
 
 
 
-//Adding event listeners
-instance.events.Deposit()
+//Adding contract event listeners
+contract.events.Deposit()
 .on('data', (event) => {
     console.log('data11',event);
 })
-.on('connected', (event) =>{
-  console.log("Subscribed to event Deposit: ")
+.on('connected', (subscriptionId) =>{
+  console.log("Subscribed to event Deposit: ",subscriptionId);
 })
-.on('error', console.error);
+.on('changed', (event) => {
+  // remove event from local database
+})
+.on('error', (error) =>{
+  console.log(error);
+});
+
+
 
 //Websocket connections
 io.on('connection', (socket) => {
@@ -51,3 +65,4 @@ io.on('connection', (socket) => {
   });
 
 });
+

@@ -9,8 +9,8 @@ const token1ABI = JSON.parse(fs.readFileSync('../on_chain_exchange/build/contrac
 const token1Address = process.env.TESTTOKEN1;
 const provdier = new Provider();
 const testtoken1 = new Contract(token1ABI,token1Address).initContract();
-const contract = new Contract(ABI,ADDRESS);
-const instance = contract.initContract()
+const contract = new Contract(ABI,ADDRESS).initContract();
+
 
 const init = async () =>{
     const accounts = await provdier.web3.eth.getAccounts();
@@ -24,13 +24,15 @@ const init = async () =>{
           from: accounts[0]
         });
   
-        console.log("hell")
-  
-    await instance.methods
+    await contract.methods
       .depositToken("0x254dffcd3277C0b1660F6d42EFbB754edaBAbC2B", 5)
       .send({
         from: accounts[0]
     });
+
+    //await console.log(receipt.events);
+    //await console.log(out.events);
+    //process.exit();
   }
   
-  init();
+init();

@@ -5,7 +5,8 @@ class Provider {
     //setup web3 provider
     this.web3 = new Web3(
       //new Web3.providers.HttpProvider('http://localhost:8545'),
-      new Web3(Web3.givenProvider || "ws://127.0.0.1:8545"),
+      //new Web3(Web3.givenProvider || "ws://127.0.0.1:8545"),
+      new Web3("ws://127.0.0.1:8545"),
     )
   }
 }
