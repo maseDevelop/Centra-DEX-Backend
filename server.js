@@ -1,7 +1,7 @@
 const io = require('socket.io')(3000);
 const Contract = require('./Contracts');
-const Provider = require('./Provider');
 const {changeUserBalance, makeOffer} = require('./queries');
+const {GetPrice} = require('./helpers');
 const fs = require('fs');
 require('dotenv').config();
 
@@ -63,7 +63,7 @@ io.on('connection', (socket) => {
     console.log('new message - CancelOffer:', data);
   });
 
-  /*socket.on('DepositToken', (data) => {
+  socket.on('DepositToken', (data) => {
     //Return data to make a transaction - what address and function to call 
     console.log('new message - DepositToken:', data);
   });
@@ -71,7 +71,6 @@ io.on('connection', (socket) => {
   socket.on('WithdrawToken', (data) => {
     //Return data to make a transaction - what address and function to call
     console.log('new message - WithdrawToken:', data);
-  });*/
-
+  });
 });
 

@@ -28,14 +28,14 @@ const changeUserBalance = (address,token_balance,balance) => {
     });
 };
 
-const makeOffer = (sell_amt,sell_token,buy_amt,buy_token,owner,timeStamp,signiture,price) =>{
+const makeOffer = (sell_amt,sell_token,buy_amt,buy_token,owner,timeStamp,signiture,price,lowest_sell_price) =>{
     return new Promise((resolve) => {
         pool.query(
-         'INSERT INTO order_table(sell_amt,sell_token,buy_amt,buy_token,owner,timeStamp,signiture,price) VALUES($1,$2,$3,$4,$5,$6,$7) RETURNING id',
-           [sell_amt,sell_token,buy_amt,buy_token,owner,timeStamp,signiture,price],
+         'INSERT INTO order_table(sell_amt,sell_token,buy_amt,buy_token,owner,timeStamp,signiture,price,lowest_sell_price) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id',
+           [sell_amt,sell_token,buy_amt,buy_token,owner,timeStamp,signiture,price,lowest_sell_price],
            (error, results) => {
              if (error) {
-                 throw error;
+                throw error;
              }
              resolve(results.rows);
            }
@@ -72,14 +72,14 @@ const takeOffer = (id) =>{
     });
 }
 
-const getoffers = (sell_token, buy_token) =>{
+const getoffers = (sell_token, buy_token, maker_price) =>{
     return new Promise((resolve) => {
-
         pool.query(
-         `SELECT * FROM order_table WHERE sell_token = '${sell_token}' and buy_token = '${buy_token}'`,
+         //`SELECT * FROM order_table WHERE sell_token = '${sell_token}' and buy_token = '${buy_token}'`,
+         `SELECT * FROM order_table WHERE sell_token = '${sell_token}' AND buy_token = '${buy_token}' AND price <= ${maker_price} AND lowest_sell_price >= ${maker_price}`,
            (error, results) => {
              if (error) {
-                 throw error;
+                throw error;
              }
              resolve(results.rows);
            }

@@ -34,7 +34,7 @@ const init = async () =>{
     });*/
 
     console.log("make offer:", Date.now());
-    //makeOffer(20,'0x3344534544',20,'0x33434343','0x35345345',Date.now(),'0x543543534');
+    makeOffer(20,'0x3344534544',20,'0x33434343','0x35345345',Date.now(),'0x543543534',1,1);
     //updateOffer(2,3,3,);
 
     matchOffers('0x3344534544','0x33434343');
