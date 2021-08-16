@@ -3,6 +3,7 @@ require('dotenv').config();
 const fs = require('fs');
 const Contract = require('./Contracts');
 const Provider = require('./Provider');
+const {GetPrice} = require('./helpers');
 const {changeUserBalance, makeOffer,updateOffer} = require('./queries');
 const {matchOffers} = require('./matchingEngine');
 const ABI = JSON.parse(fs.readFileSync('../on_chain_exchange/build/contracts/MatchingEngine.json', 'utf8')).abi;
@@ -34,10 +35,10 @@ const init = async () =>{
     });*/
 
     console.log("make offer:", Date.now());
-    makeOffer(20,'0x3344534544',20,'0x33434343','0x35345345',Date.now(),'0x543543534',1,1);
+    makeOffer(10,'0x3344534544',20,'0x33434343','0x35345345',Date.now(),'0x543543534',GetPrice(10,20), GetPrice(20,10));
     //updateOffer(2,3,3,);
 
-    matchOffers('0x3344534544','0x33434343');
+    matchOffers('0x3344534544','0x33434343',1);
     
 
   }

@@ -14,7 +14,7 @@ const pool = new Pool({
 const matchOffers = async (sell_token, buy_token) => {
 
     //Get current offers stored in the database - that are sorted;
-    const currentOffers = await getoffers(sell_token,buy_token,1);
+    const currentOffers = await getoffers(sell_token,buy_token,2);
 
     console.log(currentOffers);
 
