@@ -26,10 +26,55 @@ const changeUserBalance = (address,token_balance,balance) => {
           }
        );
     });
- };
+};
 
+const makeOffer = (sell_amt,sell_token,buy_amt,buy_token,owner,timeStamp,signiture) =>{
+    return new Promise((resolve) => {
+        pool.query(
+         'INSERT INTO order_table(sell_amt,sell_token,buy_amt,buy_token,owner,timeStamp,signiture) VALUES($1,$2,$3,$4,$5,$6,$7) RETURNING id',
+           [sell_amt,sell_token,buy_amt,buy_token,owner,timeStamp,signiture],
+           (error, results) => {
+             if (error) {
+                 throw error;
+             }
+             resolve(results.rows);
+           }
+        );
+    });
+}
+
+const updateOffer = (id, sell_amt, buy_amt) =>{
+    return new Promise((resolve) => {
+        pool.query(
+         `UPDATE order_table SET sell_amt = ${sell_amt}, buy_amt = ${buy_amt} WHERE id= ${id} RETURNING id`,
+           
+           (error, results) => {
+             if (error) {
+                 throw error;
+             }
+             resolve(results.rows);
+           }
+        );
+    });
+}
+
+const takeOffer = (id) =>{
+    return new Promise((resolve) => {
+        pool.query(
+         `DELETE FROM order_table WHERE id= ${id} RETURNING *`,
+           (error, results) => {
+             if (error) {
+                 throw error;
+             }
+             resolve(results.rows);
+           }
+        );
+    });
+}
 
 
 module.exports = {
     changeUserBalance,
+    makeOffer,
+    updateOffer
 };

@@ -3,6 +3,7 @@ require('dotenv').config();
 const fs = require('fs');
 const Contract = require('./Contracts');
 const Provider = require('./Provider');
+const {changeUserBalance, makeOffer,updateOffer} = require('./queries');
 const ABI = JSON.parse(fs.readFileSync('../on_chain_exchange/build/contracts/MatchingEngine.json', 'utf8')).abi;
 const ADDRESS = process.env.EXCHANGECONTRACT;//Exchange contract address
 const token1ABI = JSON.parse(fs.readFileSync('../on_chain_exchange/build/contracts/Testtoken1.json', 'utf8')).abi;
@@ -17,8 +18,9 @@ const init = async () =>{
   
     console.log(accounts[0])
     console.log(ADDRESS);
+
     //EC20 making sure that the contract can be accepted
-    await testtoken1.methods
+    /*await testtoken1.methods
         .approve(ADDRESS, 50)
         .send({
           from: accounts[0]
@@ -28,11 +30,13 @@ const init = async () =>{
       .depositToken("0x254dffcd3277C0b1660F6d42EFbB754edaBAbC2B", 5)
       .send({
         from: accounts[0]
-    });
+    });*/
 
-    //await console.log(receipt.events);
-    //await console.log(out.events);
-    //process.exit();
+    console.log("make offer:", Date.now());
+    makeOffer(20,'0x3344534544',20,'0x33434343','0x35345345',Date.now(),'0x543543534');
+    //updateOffer(2,3,3,);
+    
+
   }
   
 init();
