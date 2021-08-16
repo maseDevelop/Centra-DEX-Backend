@@ -1,4 +1,4 @@
-const { createAdapter } = require("@socket.io/postgres-adapter");
+//const { createAdapter } = require("@socket.io/postgres-adapter");
 const { Pool } = require("pg");
 require('dotenv').config();
 
@@ -28,11 +28,11 @@ const changeUserBalance = (address,token_balance,balance) => {
     });
 };
 
-const makeOffer = (sell_amt,sell_token,buy_amt,buy_token,owner,timeStamp,signiture) =>{
+const makeOffer = (sell_amt,sell_token,buy_amt,buy_token,owner,timeStamp,signiture,price) =>{
     return new Promise((resolve) => {
         pool.query(
-         'INSERT INTO order_table(sell_amt,sell_token,buy_amt,buy_token,owner,timeStamp,signiture) VALUES($1,$2,$3,$4,$5,$6,$7) RETURNING id',
-           [sell_amt,sell_token,buy_amt,buy_token,owner,timeStamp,signiture],
+         'INSERT INTO order_table(sell_amt,sell_token,buy_amt,buy_token,owner,timeStamp,signiture,price) VALUES($1,$2,$3,$4,$5,$6,$7) RETURNING id',
+           [sell_amt,sell_token,buy_amt,buy_token,owner,timeStamp,signiture,price],
            (error, results) => {
              if (error) {
                  throw error;
@@ -72,9 +72,26 @@ const takeOffer = (id) =>{
     });
 }
 
+const getoffers = (sell_token, buy_token) =>{
+    return new Promise((resolve) => {
+
+        pool.query(
+         `SELECT * FROM order_table WHERE sell_token = '${sell_token}' and buy_token = '${buy_token}'`,
+           (error, results) => {
+             if (error) {
+                 throw error;
+             }
+             resolve(results.rows);
+           }
+        );
+    });
+}
+
 
 module.exports = {
     changeUserBalance,
     makeOffer,
-    updateOffer
+    updateOffer,
+    takeOffer,
+    getoffers,
 };

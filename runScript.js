@@ -4,6 +4,7 @@ const fs = require('fs');
 const Contract = require('./Contracts');
 const Provider = require('./Provider');
 const {changeUserBalance, makeOffer,updateOffer} = require('./queries');
+const {matchOffers} = require('./matchingEngine');
 const ABI = JSON.parse(fs.readFileSync('../on_chain_exchange/build/contracts/MatchingEngine.json', 'utf8')).abi;
 const ADDRESS = process.env.EXCHANGECONTRACT;//Exchange contract address
 const token1ABI = JSON.parse(fs.readFileSync('../on_chain_exchange/build/contracts/Testtoken1.json', 'utf8')).abi;
@@ -33,8 +34,10 @@ const init = async () =>{
     });*/
 
     console.log("make offer:", Date.now());
-    makeOffer(20,'0x3344534544',20,'0x33434343','0x35345345',Date.now(),'0x543543534');
+    //makeOffer(20,'0x3344534544',20,'0x33434343','0x35345345',Date.now(),'0x543543534');
     //updateOffer(2,3,3,);
+
+    matchOffers('0x3344534544','0x33434343');
     
 
   }

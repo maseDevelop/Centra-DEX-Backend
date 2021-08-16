@@ -5,13 +5,10 @@ const {changeUserBalance, makeOffer} = require('./queries');
 const fs = require('fs');
 require('dotenv').config();
 
-
-
-//Contract setup
+//Matching Engine Exchange - Contract setup
 const ABI = JSON.parse(fs.readFileSync('../on_chain_exchange/build/contracts/MatchingEngine.json', 'utf8')).abi;
 const ADDRESS = process.env.EXCHANGECONTRACT;//Exchange contract address
 const contract = new Contract(ABI,ADDRESS).initContract();//Exchange contract
-
 
 
 //Adding contract event listeners
@@ -33,6 +30,7 @@ contract.events.Deposit()
 contract.events.Withdraw()
 .on('data', (event) => {
   console.log('data1',event.returnValues);
+  //Removing values from the database
   changeUserBalance(event.returnValues.user,
     event.returnValues.token,
     event.returnValues.balance);
@@ -48,13 +46,13 @@ contract.events.Withdraw()
 });
 
 
-
 //Websocket connections
 io.on('connection', (socket) => {
   console.log('client connected:', socket.client.id);
 
   socket.on('MakeOffer', (data) => {
     console.log('new message - MakeOffer:', data);
+    //Try and match orders
   });
 
   socket.on('TakeOffer', (data) => {
@@ -65,7 +63,7 @@ io.on('connection', (socket) => {
     console.log('new message - CancelOffer:', data);
   });
 
-  socket.on('DepositToken', (data) => {
+  /*socket.on('DepositToken', (data) => {
     //Return data to make a transaction - what address and function to call 
     console.log('new message - DepositToken:', data);
   });
@@ -73,7 +71,7 @@ io.on('connection', (socket) => {
   socket.on('WithdrawToken', (data) => {
     //Return data to make a transaction - what address and function to call
     console.log('new message - WithdrawToken:', data);
-  });
+  });*/
 
 });
 
