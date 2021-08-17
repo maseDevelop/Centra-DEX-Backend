@@ -34,11 +34,17 @@ const init = async () =>{
         from: accounts[0]
     });*/
 
-    console.log("make offer:", Date.now());
-    makeOffer(10,'0x3344534544',20,'0x33434343','0x35345345',Date.now(),'0x543543534',GetPrice(10,20), GetPrice(20,10));
+    //console.log("make offer:", Date.now());
+    makeOffer(10,'0x3344534544',20,'0x33434343','0x35345345',Date.now(),'0x543543534',GetPrice(30,10), GetPrice(30,20));
     //updateOffer(2,3,3,);
 
-    matchOffers('0x3344534544','0x33434343',1);
+    const order1 = {
+      sell_token : '0x3344534544',
+      buy_token : '0x33434343',
+      lowest_price :4,
+    }
+
+    matchOffers(order1);
     
 
   }

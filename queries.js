@@ -72,11 +72,11 @@ const takeOffer = (id) =>{
     });
 }
 
-const getoffers = (sell_token, buy_token, maker_price) =>{
+const getoffers = (sell_token, buy_token, lowest_price) =>{
     return new Promise((resolve) => {
         pool.query(
          //`SELECT * FROM order_table WHERE sell_token = '${sell_token}' and buy_token = '${buy_token}'`,
-         `SELECT * FROM order_table WHERE sell_token = '${sell_token}' AND buy_token = '${buy_token}' AND price <= ${maker_price} AND lowest_sell_price >= ${maker_price}`,
+         `SELECT * FROM order_table WHERE sell_token = '${sell_token}' AND buy_token = '${buy_token}' AND price >= ${lowest_price}  ORDER BY price`,
            (error, results) => {
              if (error) {
                 throw error;
