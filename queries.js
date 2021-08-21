@@ -29,6 +29,33 @@ const changeUserBalance = (address,token_balance,balance) => {
 };
 
 const makeOffer = (sell_amt,sell_token,buy_amt,buy_token,owner,timeStamp,signiture,price,lowest_sell_price) =>{
+  return new Promise((resolve) => {
+
+    // Initiate the Postgres transaction
+      pool.query('BEGIN')
+      pool.query('INSERT INTO order_table(sell_amt,sell_token,buy_amt,buy_token,owner,timeStamp,signiture,price,lowest_sell_price) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id',
+      [sell_amt,sell_token,buy_amt,buy_token,owner,timeStamp,signiture,price,lowest_sell_price],
+         (error, results) => {
+           if (error) {
+              throw error;
+           }
+           resolve(results.rows);
+         }
+      );
+      pool.query('INSERT INTO update_order_table(sell_amt,sell_token,buy_amt,buy_token,owner,timeStamp,signiture,price,lowest_sell_price) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id',
+      [sell_amt,sell_token,buy_amt,buy_token,owner,timeStamp,signiture,price,lowest_sell_price],
+         (error, results) => {
+           if (error) {
+              throw error;
+           }
+           resolve(results.rows);
+         }
+      );
+      pool.query('COMMIT');
+  });
+}
+
+/*const makeOffer = (sell_amt,sell_token,buy_amt,buy_token,owner,timeStamp,signiture,price,lowest_sell_price) =>{
     return new Promise((resolve) => {
         pool.query(
          'INSERT INTO order_table(sell_amt,sell_token,buy_amt,buy_token,owner,timeStamp,signiture,price,lowest_sell_price) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id',
@@ -41,12 +68,16 @@ const makeOffer = (sell_amt,sell_token,buy_amt,buy_token,owner,timeStamp,signitu
            }
         );
     });
-}
+}*/
+
+ 
 
 const updateOffer = (id, sell_amt, buy_amt) =>{
     return new Promise((resolve) => {
         pool.query(
-         `UPDATE order_table SET sell_amt = ${sell_amt}, buy_amt = ${buy_amt} WHERE id= ${id} RETURNING id`,
+         //`UPDATE update_order_table SET sell_amt = ${sell_amt}, buy_amt = ${buy_amt} WHERE id= ${id} RETURNING id`,
+
+         'UPDATE update_order_table SET sell_amt = $1, buy_amt = $2 WHERE id= $3 RETURNING id',[sell_amt,buy_amt,id],
            
            (error, results) => {
              if (error) {
@@ -60,8 +91,10 @@ const updateOffer = (id, sell_amt, buy_amt) =>{
 
 const takeOffer = (id) =>{
     return new Promise((resolve) => {
+        pool.query('BEGIN');
         pool.query(
-         `DELETE FROM order_table WHERE id= ${id} RETURNING *`,
+         `DELETE FROM order_table WHERE id= $1 RETURNING *`,
+          [id],
            (error, results) => {
              if (error) {
                  throw error;
@@ -69,14 +102,24 @@ const takeOffer = (id) =>{
              resolve(results.rows);
            }
         );
+        pool.query(
+          `DELETE FROM update_order_table WHERE id= $1 RETURNING *`,
+           [id],
+            (error, results) => {
+              if (error) {
+                  throw error;
+              }
+              resolve(results.rows);
+            }
+        );
+        pool.query('COMMIT');
     });
 }
 
 const getoffers = (sell_token, buy_token, lowest_price) =>{
     return new Promise((resolve) => {
         pool.query(
-         //`SELECT * FROM order_table WHERE sell_token = '${sell_token}' and buy_token = '${buy_token}'`,
-         `SELECT * FROM order_table WHERE sell_token = '${sell_token}' AND buy_token = '${buy_token}' AND price >= ${lowest_price}  ORDER BY price`,
+        `SELECT * FROM update_order_table WHERE sell_token = '${sell_token}' AND buy_token = '${buy_token}' AND price >= ${lowest_price}  ORDER BY price`,
            (error, results) => {
              if (error) {
                 throw error;

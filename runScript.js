@@ -4,7 +4,7 @@ const fs = require('fs');
 const Contract = require('./Contracts');
 const Provider = require('./Provider');
 const {GetPrice} = require('./helpers');
-const {changeUserBalance, makeOffer,updateOffer} = require('./queries');
+const {changeUserBalance,takeOffer, makeOffer,updateOffer} = require('./queries');
 const {matchOffers} = require('./matchingEngine');
 const ABI = JSON.parse(fs.readFileSync('../on_chain_exchange/build/contracts/MatchingEngine.json', 'utf8')).abi;
 const ADDRESS = process.env.EXCHANGECONTRACT;//Exchange contract address
@@ -35,16 +35,19 @@ const init = async () =>{
     });*/
 
     //console.log("make offer:", Date.now());
-    makeOffer(10,'0x3344534544',20,'0x33434343','0x35345345',Date.now(),'0x543543534',GetPrice(30,10), GetPrice(30,20));
+    //const out = await makeOffer(10,'0x3344534544',20,'0x33434343','0x35345345',Date.now(),'0x543543534',GetPrice(30,10), GetPrice(30,20));
     //updateOffer(2,3,3,);
-
+    //console.log(out);
     const order1 = {
       sell_token : '0x3344534544',
       buy_token : '0x33434343',
       lowest_price :4,
     }
 
-    matchOffers(order1);
+    const out1 = await takeOffer(3);
+    console.log(out1);
+
+    //matchOffers(order1);
     
 
   }
