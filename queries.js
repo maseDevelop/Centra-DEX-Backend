@@ -33,7 +33,7 @@ const makeOffer = (sell_amt,sell_token,buy_amt,buy_token,owner,timeStamp,signitu
 
     // Initiate the Postgres transaction
       pool.query('BEGIN')
-      pool.query('INSERT INTO order_table(sell_amt,sell_token,buy_amt,buy_token,owner,timeStamp,signiture,price,lowest_sell_price) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id',
+      pool.query('INSERT INTO order_table(sell_amt,sell_token,buy_amt,buy_token,owner,timeStamp,signiture,price,lowest_sell_price) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *',
       [sell_amt,sell_token,buy_amt,buy_token,owner,timeStamp,signiture,price,lowest_sell_price],
          (error, results) => {
            if (error) {
@@ -42,7 +42,7 @@ const makeOffer = (sell_amt,sell_token,buy_amt,buy_token,owner,timeStamp,signitu
            resolve(results.rows);
          }
       );
-      pool.query('INSERT INTO update_order_table(sell_amt,sell_token,buy_amt,buy_token,owner,timeStamp,signiture,price,lowest_sell_price) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id',
+      pool.query('INSERT INTO update_order_table(sell_amt,sell_token,buy_amt,buy_token,owner,timeStamp,signiture,price,lowest_sell_price) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *',
       [sell_amt,sell_token,buy_amt,buy_token,owner,timeStamp,signiture,price,lowest_sell_price],
          (error, results) => {
            if (error) {
@@ -75,10 +75,8 @@ const makeOffer = (sell_amt,sell_token,buy_amt,buy_token,owner,timeStamp,signitu
 const updateOffer = (id, sell_amt, buy_amt) =>{
     return new Promise((resolve) => {
         pool.query(
-         //`UPDATE update_order_table SET sell_amt = ${sell_amt}, buy_amt = ${buy_amt} WHERE id= ${id} RETURNING id`,
-
-         'UPDATE update_order_table SET sell_amt = $1, buy_amt = $2 WHERE id= $3 RETURNING id',[sell_amt,buy_amt,id],
-           
+         'UPDATE update_order_table SET sell_amt = $1, buy_amt = $2 WHERE id= $3 RETURNING id',
+         [sell_amt,buy_amt,id],
            (error, results) => {
              if (error) {
                  throw error;
@@ -116,10 +114,11 @@ const takeOffer = (id) =>{
     });
 }
 
-const getoffers = (sell_token, buy_token, lowest_price) =>{
+const getOffers = (sell_token, buy_token, lowest_price) =>{
     return new Promise((resolve) => {
         pool.query(
-        `SELECT * FROM update_order_table WHERE sell_token = '${sell_token}' AND buy_token = '${buy_token}' AND price >= ${lowest_price}  ORDER BY price`,
+        `SELECT * FROM update_order_table WHERE sell_token = $1 AND buy_token = $2 AND price >= $3  ORDER BY price`,
+        [sell_token, buy_token, lowest_price],
            (error, results) => {
              if (error) {
                 throw error;
@@ -136,5 +135,5 @@ module.exports = {
     makeOffer,
     updateOffer,
     takeOffer,
-    getoffers,
+    getOffers,
 };

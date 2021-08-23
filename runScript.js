@@ -4,8 +4,9 @@ const fs = require('fs');
 const Contract = require('./Contracts');
 const Provider = require('./Provider');
 const {GetPrice} = require('./helpers');
-const {changeUserBalance,takeOffer, makeOffer,updateOffer} = require('./queries');
+const {changeUserBalance,takeOffer, makeOffer,updateOffer, getOffers} = require('./queries');
 const {matchOffers} = require('./matchingEngine');
+const { match } = require("assert");
 const ABI = JSON.parse(fs.readFileSync('../on_chain_exchange/build/contracts/MatchingEngine.json', 'utf8')).abi;
 const ADDRESS = process.env.EXCHANGECONTRACT;//Exchange contract address
 const token1ABI = JSON.parse(fs.readFileSync('../on_chain_exchange/build/contracts/Testtoken1.json', 'utf8')).abi;
@@ -33,22 +34,51 @@ const init = async () =>{
       .send({
         from: accounts[0]
     });*/
-
-    //console.log("make offer:", Date.now());
-    //const out = await makeOffer(10,'0x3344534544',20,'0x33434343','0x35345345',Date.now(),'0x543543534',GetPrice(30,10), GetPrice(30,20));
-    //updateOffer(2,3,3,);
-    //console.log(out);
     const order1 = {
-      sell_token : '0x3344534544',
-      buy_token : '0x33434343',
-      lowest_price :4,
+      sell_amt : 10,
+      sell_token : '0x4444',
+      buy_amt : 10,
+      buy_token : '0x3333',
+      owner : '0x1234',
+      timestamp : Date.now(),
+      signiture : '0x1111',
+      price : GetPrice(10,10),
+      lowest_sell_price : GetPrice(10,10)
     }
 
-    const out1 = await takeOffer(3);
-    console.log(out1);
-
-    //matchOffers(order1);
+  const order2 = {
+      sell_amt : 20,
+      sell_token : '0x3333',
+      buy_amt : 20,
+      buy_token : '0x4444',
+      owner : '0x1234',
+      timestamp : Date.now(),
+      signiture : '0x1111',
+      price : GetPrice(10,10),
+      lowest_sell_price : GetPrice(10,10)
+    }
     
+    
+    /*const out = await makeOffer(
+      order1.sell_amt,
+      order1.sell_token,
+      order1.buy_amt,
+      order1.buy_token,
+      order1.owner,
+      order1.timestamp,
+      order1.signiture,
+      order1.price,
+      order1.lowest_sell_price
+      );*/
+
+    //console.log(out);
+
+    //const out1 = await getoffers('0x3333','0x4444',1);
+    //const out1 = await getoffers(order1.buy_token,order1.sell_token,1);
+    //console.log("orders: ", out1);
+    
+    const output_orders = await matchOffers(order2);
+    console.log("ORDERS: ", output_orders);
 
   }
   
