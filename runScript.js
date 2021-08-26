@@ -47,9 +47,9 @@ const init = async () =>{
     }
 
   const order2 = {
-      sell_amt : 20,
+      sell_amt : 100,
       sell_token : '0x3333',
-      buy_amt : 20,
+      buy_amt : 100,
       buy_token : '0x4444',
       owner : '0x1234',
       timestamp : Date.now(),

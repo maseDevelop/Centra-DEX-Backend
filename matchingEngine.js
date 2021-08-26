@@ -1,5 +1,5 @@
 const { Pool } = require("pg");
-const {getOffers, makeOffer, updateOffer} = require('./queries');
+const {getOffers, makeOffer, updateOffer,getOffer} = require('./queries');
 const {GetPrice} = require('./helpers');
 require('dotenv').config();
 
@@ -28,11 +28,13 @@ const trade = async (maker,taker,quantity,paritalFill) =>{
             } 
             
             //Updating order data
-            const newSellAmt = maker.sell_amt - quantity;
-            const newBuyAmt = maker.buy_amt - tradeAmount;
+            const newSellAmt = taker.sell_amt - quantity;
+            const newBuyAmt = taker.buy_amt - tradeAmount;
             
-            await updateOffer(maker.id,0,0);//updating maker order
-            await updateOffer(taker.id,newSellAmt,newBuyAmt);//updating taker order
+            const one = await updateOffer(maker.id,0,0);//updating maker order
+            console.log("one", one);
+            const two = await updateOffer(taker.id,newSellAmt,newBuyAmt);//updating taker order
+            console.log("two: ", two);
 
             return tradeData;
 
@@ -77,11 +79,11 @@ const trade = async (maker,taker,quantity,paritalFill) =>{
 const matchOffers = async (order) => {
 
     //Creating the offer first
-    const [currentOrder] = await makeOffer(order.sell_amt,order.sell_token,order.buy_amt,order.buy_token,order.owner,order.timeStamp,order.signiture,order.price,order.lowest_sell_price);
+    const [currentID] = await makeOffer(order.sell_amt,order.sell_token,order.buy_amt,order.buy_token,order.owner,order.timeStamp,order.signiture,order.price,order.lowest_sell_price);
     
     //Get current offers stored in the database - that are sorted;
     const currentOffers = await getOffers(order.buy_token, order.sell_token, order.lowest_sell_price);
-
+    
     console.log("Current Offers: ", currentOffers);
 
     //If there is no offers then return
@@ -95,9 +97,14 @@ const matchOffers = async (order) => {
     let count = 0;
     let orderFillAmount;
     let trade_data_arr = [];
+    let currentOrder;
 
 
     while(!offerFilled && (count < currentOffers.length)){
+
+        console.log("current ID", currentID.id );
+
+        [currentOrder] = await getOffer(currentID.id);
 
         console.log("In loop");
 
@@ -107,6 +114,7 @@ const matchOffers = async (order) => {
         console.log("currentoffer[count] buy amt", currentOffers[count].buy_amt);
         console.log("orderFilledAmount: ", orderFillAmount);
 
+       
         if(orderFillAmount > 0){
 
             console.log("Partial filled taker order");

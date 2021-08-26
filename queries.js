@@ -129,6 +129,23 @@ const getOffers = (sell_token, buy_token, lowest_price) =>{
     });
 }
 
+const getOffer = (id) =>{
+    return new Promise((resolve) => {
+        pool.query(
+        `SELECT * FROM update_order_table WHERE id = $1`,
+        [id],
+           (error, results) => {
+             if (error) {
+                throw error;
+             }
+             resolve(results.rows);
+           }
+        );
+    });
+}
+
+
+
 
 module.exports = {
     changeUserBalance,
@@ -136,4 +153,5 @@ module.exports = {
     updateOffer,
     takeOffer,
     getOffers,
+    getOffer,
 };
