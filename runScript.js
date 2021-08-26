@@ -57,7 +57,18 @@ const init = async () =>{
       price : GetPrice(10,10),
       lowest_sell_price : GetPrice(10,10)
     }
-    
+   
+  const order3 = {
+      sell_amt : 10,
+      sell_token : '0x4444',
+      buy_amt : 10,
+      buy_token : '0x3333',
+      owner : '0x1234',
+      timestamp : Date.now(),
+      signiture : '0x1111',
+      price : GetPrice(10,10),
+      lowest_sell_price : GetPrice(10,10)
+    }
     
     /*const out = await makeOffer(
       order1.sell_amt,
@@ -77,9 +88,11 @@ const init = async () =>{
     //const out1 = await getoffers(order1.buy_token,order1.sell_token,1);
     //console.log("orders: ", out1);
     
-    const output_orders = await matchOffers(order2);
-    console.log("ORDERS: ", output_orders);
-
+    //const output_orders = await matchOffers(order2);
+    //console.log("ORDERS: ", output_orders);
+    
+    const o = await matchOffers(order3);
+    console.log("ORDERS: ",o);
   }
   
 init();
