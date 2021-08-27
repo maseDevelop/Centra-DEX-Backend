@@ -1,6 +1,6 @@
 const { Pool } = require("pg");
 const {getOffers, makeOffer, updateOffer,getOffer} = require('./queries');
-const {GetPrice} = require('./helpers');
+const {GetPrice,ToBigNum} = require('./helpers');
 require('dotenv').config();
 
 const trade = async (maker,taker,quantity,paritalFill) =>{
@@ -21,10 +21,10 @@ const trade = async (maker,taker,quantity,paritalFill) =>{
 
             const tradeData = {
                 takerToken: taker.sell_token,
-                takerSellAmt: tradeAmount,
+                takerSellAmt: ToBigNum(tradeAmount),
                 makerAddress: maker.owner,
-                makerToken : maker.buy_token,
-                makerBuyAmt: maker.buy_amt,
+                makerToken : maker.sell_token,
+                makerBuyAmt: ToBigNum(maker.buy_amt),
             } 
             
             //Updating order data
@@ -53,10 +53,10 @@ const trade = async (maker,taker,quantity,paritalFill) =>{
 
             const tradeData = {
                 takerToken: taker.sell_token,
-                takerSellAmt: taker.sell_amt,
+                takerSellAmt: ToBigNum(taker.sell_amt),
                 makerAddress: maker.owner,
-                makerToken: maker.buy_token,
-                makerBuyAmt: tradeAmount,
+                makerToken: maker.sell_token,
+                makerBuyAmt: ToBigNum(tradeAmount),
             }
 
             const newSellAmt = maker.sell_amt - quantity;
@@ -88,8 +88,7 @@ const matchOffers = async (order) => {
 
     //If there is no offers then return
     if(currentOffers.length == 0){
-        console.log("No Offers");
-        return;
+        return {status : "Order Added"};
     }
 
     //Match as many offers as you can for the taker
@@ -102,22 +101,22 @@ const matchOffers = async (order) => {
 
     while(!offerFilled && (count < currentOffers.length)){
 
-        console.log("current ID", currentID.id );
+        //console.log("current ID", currentID.id );
 
         [currentOrder] = await getOffer(currentID.id);
 
-        console.log("In loop");
+        //console.log("In loop");
 
         orderFillAmount = currentOrder.sell_amt - currentOffers[count].buy_amt;
         
-        console.log("currentOrder sell amount: ", currentOrder.sell_amt);
-        console.log("currentoffer[count] buy amt", currentOffers[count].buy_amt);
-        console.log("orderFilledAmount: ", orderFillAmount);
+        //console.log("currentOrder sell amount: ", currentOrder.sell_amt);
+        ////console.log("currentoffer[count] buy amt", currentOffers[count].buy_amt);
+        //console.log("orderFilledAmount: ", orderFillAmount);
 
        
         if(orderFillAmount > 0){
 
-            console.log("Partial filled taker order");
+            //console.log("Partial filled taker order");
 
             //Trade - Partially filled
 
@@ -129,7 +128,7 @@ const matchOffers = async (order) => {
         }
         else{
 
-            console.log("Fully filled taker order");
+            //console.log("Fully filled taker order");
 
             //Trade - Fully Filled
 
@@ -141,9 +140,38 @@ const matchOffers = async (order) => {
         }
     }
 
+    console.log("outtttttttttt: ", trade_data_arr);
     return trade_data_arr;
+    
 };
 
+const matchOffer = async (order,id) =>{
+
+    //Creating the offer first
+    const [currentOrder] = await makeOffer(order.sell_amt,order.sell_token,order.buy_amt,order.buy_token,order.owner,order.timeStamp,order.signiture,order.price,order.lowest_sell_price);
+
+    //Getting the order that they want to take
+    const [makerOrder] = await getOffer(id);
+
+    orderFillAmount = currentOrder.sell_amt - makerOrder.buy_amt;
+
+    if(orderFillAmount > 0){
+
+        //Partially filled order
+
+        return await trade(makerOrder,currentOrder,makerOrder.buy_amt,true);
+
+    }else{
+
+        //Fully filled order
+
+       return await trade(makerOrder,currentOrder,currentOrder.sell_amt,false);
+    }
+    
+
+}
+
 module.exports = {
-    matchOffers
+    matchOffers,
+    matchOffer
 };

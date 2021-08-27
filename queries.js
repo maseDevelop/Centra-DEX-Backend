@@ -87,7 +87,7 @@ const updateOffer = (id, sell_amt, buy_amt) =>{
     });
 }
 
-const takeOffer = (id) =>{
+const deleteOffer = (id) =>{
     return new Promise((resolve) => {
         pool.query('BEGIN');
         pool.query(
@@ -151,7 +151,7 @@ module.exports = {
     changeUserBalance,
     makeOffer,
     updateOffer,
-    takeOffer,
+    deleteOffer,
     getOffers,
     getOffer,
 };

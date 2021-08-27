@@ -1,8 +1,9 @@
 const io = require('socket.io')(3000);
 const Contract = require('./Contracts');
-const {changeUserBalance, makeOffer} = require('./queries');
+const {changeUserBalance, makeOffer, deleteOffer} = require('./queries');
 const {GetPrice} = require('./helpers');
 const fs = require('fs');
+const { matchOffer, matchOffers } = require('./matchingEngine');
 require('dotenv').config();
 
 //Matching Engine Exchange - Contract setup
@@ -50,17 +51,27 @@ contract.events.Withdraw()
 io.on('connection', (socket) => {
   console.log('client connected:', socket.client.id);
 
-  socket.on('MakeOffer', (data) => {
-    console.log('new message - MakeOffer:', data);
+  socket.on('MakeOffer', async (order) => {
+    console.log('new message - MakeOffer:', order);
+
     //Try and match orders
+    const out = await matchOffers(order); 
+    console.log("out: ",out);
+    socket.emit("ReturnedMakeOffer",out);
   });
 
-  socket.on('TakeOffer', (data) => {
+  socket.on('TakeOffer', async (data) => {
     console.log('new message - TakeOffer:', data);
+
+    //Try and take an order
+    const out = await matchOffer(data);
   });
 
-  socket.on('CancelOffer', (data) => {
+  socket.on('CancelOffer', async (data) => {
     console.log('new message - CancelOffer:', data);
+
+    //Canel the order
+    await deleteOffer(data);
   });
 
   socket.on('DepositToken', (data) => {
