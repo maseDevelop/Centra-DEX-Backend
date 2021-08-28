@@ -1,4 +1,3 @@
-//const { createAdapter } = require("@socket.io/postgres-adapter");
 const { Pool } = require("pg");
 require('dotenv').config();
 
@@ -28,13 +27,13 @@ const changeUserBalance = (address,token_balance,balance) => {
     });
 };
 
-const makeOffer = (sell_amt,sell_token,buy_amt,buy_token,owner,timeStamp,signiture,price,lowest_sell_price) =>{
+const makeOffer = (sell_amt,sell_token,buy_amt,buy_token,owner,timeStamp,signature,price,lowest_sell_price) =>{
   return new Promise((resolve) => {
 
     // Initiate the Postgres transaction
       pool.query('BEGIN')
-      pool.query('INSERT INTO order_table(sell_amt,sell_token,buy_amt,buy_token,owner,timeStamp,signiture,price,lowest_sell_price) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *',
-      [sell_amt,sell_token,buy_amt,buy_token,owner,timeStamp,signiture,price,lowest_sell_price],
+      pool.query('INSERT INTO order_table(sell_amt,sell_token,buy_amt,buy_token,owner,timeStamp,signature,price,lowest_sell_price) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *',
+      [sell_amt,sell_token,buy_amt,buy_token,owner,timeStamp,signature,price,lowest_sell_price],
          (error, results) => {
            if (error) {
               throw error;
@@ -42,8 +41,8 @@ const makeOffer = (sell_amt,sell_token,buy_amt,buy_token,owner,timeStamp,signitu
            resolve(results.rows);
          }
       );
-      pool.query('INSERT INTO update_order_table(sell_amt,sell_token,buy_amt,buy_token,owner,timeStamp,signiture,price,lowest_sell_price) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *',
-      [sell_amt,sell_token,buy_amt,buy_token,owner,timeStamp,signiture,price,lowest_sell_price],
+      pool.query('INSERT INTO update_order_table(sell_amt,sell_token,buy_amt,buy_token,owner,timeStamp,signature,price,lowest_sell_price) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *',
+      [sell_amt,sell_token,buy_amt,buy_token,owner,timeStamp,signature,price,lowest_sell_price],
          (error, results) => {
            if (error) {
               throw error;
@@ -55,11 +54,11 @@ const makeOffer = (sell_amt,sell_token,buy_amt,buy_token,owner,timeStamp,signitu
   });
 }
 
-/*const makeOffer = (sell_amt,sell_token,buy_amt,buy_token,owner,timeStamp,signiture,price,lowest_sell_price) =>{
+/*const makeOffer = (sell_amt,sell_token,buy_amt,buy_token,owner,timeStamp,signature,price,lowest_sell_price) =>{
     return new Promise((resolve) => {
         pool.query(
-         'INSERT INTO order_table(sell_amt,sell_token,buy_amt,buy_token,owner,timeStamp,signiture,price,lowest_sell_price) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id',
-           [sell_amt,sell_token,buy_amt,buy_token,owner,timeStamp,signiture,price,lowest_sell_price],
+         'INSERT INTO order_table(sell_amt,sell_token,buy_amt,buy_token,owner,timeStamp,signature,price,lowest_sell_price) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id',
+           [sell_amt,sell_token,buy_amt,buy_token,owner,timeStamp,signature,price,lowest_sell_price],
            (error, results) => {
              if (error) {
                 throw error;
@@ -70,7 +69,20 @@ const makeOffer = (sell_amt,sell_token,buy_amt,buy_token,owner,timeStamp,signitu
     });
 }*/
 
- 
+const getOfferForHash = (id) => {
+    return new Promise((resolve) => {
+      pool.query(
+        'SELECT sell_amt, sell_token, buy_amt, buy_token, owner, signature FROM order_table WHERE id = $1',
+        [id],
+        (error, results) => {
+          if(error) {
+            throw error;
+          }
+          resolve(results.rows);
+        }
+      );
+    });
+} 
 
 const updateOffer = (id, sell_amt, buy_amt) =>{
     return new Promise((resolve) => {
@@ -154,4 +166,6 @@ module.exports = {
     deleteOffer,
     getOffers,
     getOffer,
-};
+    getOfferForHash,
+}
+

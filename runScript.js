@@ -3,8 +3,8 @@ require('dotenv').config();
 const fs = require('fs');
 const Contract = require('./Contracts');
 const Provider = require('./Provider');
-const {GetPrice, checkOrderSigniture, signOrder} = require('./helpers');
-const {changeUserBalance,takeOffer, makeOffer,updateOffer, getOffers} = require('./queries');
+const {GetPrice, checkOrderSignature, signOrder} = require('./helpers');
+const {changeUserBalance,takeOffer, makeOffer,updateOffer, getOffers, getOfferForHash} = require('./queries');
 const {matchOffers} = require('./matchingEngine');
 const { match } = require("assert");
 const ABI = JSON.parse(fs.readFileSync('../on_chain_exchange/build/contracts/MatchingEngine.json', 'utf8')).abi;
@@ -42,7 +42,7 @@ const init = async () =>{
       buy_token : '0x3333',
       owner : '0xACa94ef8bD5ffEE41947b4585a84BdA5a3d3DA6E',
       timestamp : Date.now(),
-      signiture : '0x1111',
+      signature : '0x1111',
       price : GetPrice(10,10),
       lowest_sell_price : GetPrice(10,10)
     }
@@ -54,7 +54,7 @@ const init = async () =>{
       buy_token : '0x4444',
       owner : '0x1234',
       timestamp : Date.now(),
-      signiture : '0x1111',
+      signature : '0x1111',
       price : GetPrice(10,10),
       lowest_sell_price : GetPrice(10,10)
     }
@@ -66,7 +66,7 @@ const init = async () =>{
       buy_token : '0x3333',
       owner : '0x1234',
       timestamp : Date.now(),
-      signiture : '0x1111',
+      signature : '0x1111',
       price : GetPrice(10,10),
       lowest_sell_price : GetPrice(10,10)
     }
@@ -78,7 +78,7 @@ const init = async () =>{
       order1.buy_token,
       order1.owner,
       order1.timestamp,
-      order1.signiture,
+      order1.signature,
       order1.price,
       order1.lowest_sell_price
       );*/
@@ -89,16 +89,19 @@ const init = async () =>{
     //const out1 = await getoffers(order1.buy_token,order1.sell_token,1);
     //console.log("orders: ", out1);
     
-    //const output_orders = await matchOffers(order2);
-    //console.log("ORDERS: ", output_orders);
+    const output_orders = await matchOffers(order2);
+    console.log("ORDERS: ", output_orders);
     
+    
+    //const order = await getOfferForHash(4);
+    //console.log(order);
     //const o = await matchOffers(order3);
     //console.log("ORDERS: ",o);
 
     //const sig = await provider.web3.eth.personal.sign("Hello", process.env.CENTRADEXPUBLICKEY, process.env.CENTRAPRIVATEKEY);
     //console.log(sig);
 
-    const dataOrder1 = {
+    /*const dataOrder1 = {
       sell_amt : order1.sell_amt,
       sell_token : order1.sell_token,
       buy_amt : order1.buy_amt,
@@ -106,20 +109,20 @@ const init = async () =>{
       owner : order1.owner
       };
 
-    console.log(dataOrder1);
+    console.log(dataOrder1);*/
 
     
     //const data = String(dataOrder1.sell_amt + dataOrder1.sell_token + dataOrder1.buy_amt + dataOrder1.buy_token + dataOrder1.owner);
     //const sigObj = await provider.web3.eth.accounts.sign(String(dataOrder1), process.env.CENTRADEXPRIVATEKEY);
     //console.log(sigObj);
 
-    const output = await signOrder(dataOrder1);
+    //const output = await signOrder(dataOrder1);
     
     //const signerAddress = await provider.web3.eth.accounts.recover(sigObj);
     //console.log("SIGNER:" , signerAddress);
 
-    const boolout = await checkOrderSigniture(dataOrder1,output.signature,String(process.env.CENTRADEXPUBLICKEY));
-    console.log(boolout);
+    //const boolout = await checkOrderSignature(dataOrder1,output.signature,String(process.env.CENTRADEXPUBLICKEY));
+    //console.log(boolout);
     
     //const signerAddress = await provider.web3.eth.accounts.recover();
     //console.log("Signer Address: ", signerAddress);

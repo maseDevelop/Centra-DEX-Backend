@@ -41,7 +41,7 @@ const GetPrice = (sell_amt,buy_amt) => {
  * @param {*} owner the owner of the data 
  * @returns 
  */
-const checkOrderSigniture = async (dataThatWasSigned, signature, owner) =>{
+const checkOrderSignature = async (dataThatWasSigned, signature, owner) =>{
 
     //Recovering the accoun to verify that you 
     const signerAddress = await provider.web3.eth.accounts.recover((dataThatWasSigned.sell_amt + dataThatWasSigned.sell_token + dataThatWasSigned.buy_amt + dataThatWasSigned.buy_token + dataThatWasSigned.owner), signature);
@@ -51,22 +51,32 @@ const checkOrderSigniture = async (dataThatWasSigned, signature, owner) =>{
 
 /**
  * Signs order with the CENTRA DEX key 
- * @param {} dataThatWasSigned data to sign 
+ * @param {*} data to sign 
  * @returns 
  */
-const signOrder = async (dataThatWasSigned) => {
+const signOrder = async (data) => {
    
    //Sign order with CENTRA DEX key
-   const signedOrder = await provider.web3.eth.accounts.sign(String(dataThatWasSigned.sell_amt + dataThatWasSigned.sell_token + dataThatWasSigned.buy_amt + dataThatWasSigned.buy_token + dataThatWasSigned.owner), String(process.env.CENTRADEXPRIVATEKEY));
+   const signedOrder = await provider.web3.eth.accounts.sign(
+       String(data.sell_amt
+         + data.sell_token
+         + data.buy_amt
+         + data.buy_token
+         + data.owner
+         + data.signature
+         + data.takerSellAmt
+         + data.makerAddress
+         + data.makerToken
+         + data.makerBuyAmt), String(process.env.CENTRADEXPRIVATEKEY));
 
-   return signedOrder; 
+        return await { ...data, ...{CENTRA_Signature : signedOrder.signature}}; 
 }
 
 module.exports = {
     ToBigNum,
     ToDecimalNum,
     GetPrice,
-    checkOrderSigniture,
+    checkOrderSignature,
     signOrder, 
 };
 
