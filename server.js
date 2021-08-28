@@ -56,7 +56,7 @@ io.on('connection', (socket) => {
 
     //Try and match orders
     const out = await matchOffers(order); 
-    console.log("out: ",out);
+    
     socket.emit("ReturnedMakeOffer",out);
   });
 
@@ -65,13 +65,17 @@ io.on('connection', (socket) => {
 
     //Try and take an order
     const out = await matchOffer(data);
+
+    socket.emit("ReturnedTakeOffer",out);
   });
 
   socket.on('CancelOffer', async (data) => {
     console.log('new message - CancelOffer:', data);
 
     //Canel the order
-    await deleteOffer(data);
+    const out = await deleteOffer(data);
+
+    socket.emit("ReturnedCancelOffer",out);
   });
 
   socket.on('DepositToken', (data) => {
