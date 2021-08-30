@@ -18,7 +18,83 @@ const contract = new Contract(ABI,ADDRESS).initContract();
 
 const init = async () =>{
     const accounts = await provider.web3.eth.getAccounts();
+
+    //START
+    await testtoken1.methods
+        .approve(ADDRESS, 50)
+        .send({
+          from: accounts[0]
+        });
   
+
+    await contract.methods
+      .depositToken("0x254dffcd3277C0b1660F6d42EFbB754edaBAbC2B", 5)
+      .send({
+        from: accounts[0]
+    });
+
+    //Creating a message to sign
+    const order = {
+      sell_amt : 10,
+      sell_token : process.env.TESTTOKEN1,
+      buy_amt : 10,
+      buy_token : process.env.TESTTOKEN2,
+      owner : accounts[0]
+    }    
+
+    //Sign the order
+    const data = await provider.web3.utils.soliditySha3(
+        {t: 'uint256', v: order.sell_amt},
+        {t: 'address', v: order.sell_token},
+        {t: 'uint256', v: order.buy_amt},
+        {t:'address',v: order.buy_token},                
+        {t:'address',v: order.owner}
+    );
+    const account1Signature = await provider.web3.eth.accounts.sign(data, process.env.ACCOUNT1PRIVATEKEY);
+    const signedOrder = {...order, ...{signature : account1Signature.signature}};
+
+    //console.log("Signed Data: ", signedOrder);
+
+    const trade = {
+      taker_address : accounts[4],
+      taker_token : process.env.TESTTOKEN1,
+      taker_sell_amt : 10,
+      maker_address : accounts[1],
+      maker_token : process.env.TESTTOKEN1,
+      maker_buy_amt : 10
+    }
+
+    const finalOrder = {...{orderData : signedOrder}, ...{tradeData : trade}};
+    //console.log("Final Order: ", finalOrder);
+
+    const finalOrderSigned = await signOrder(finalOrder);
+    //console.log("Final Order Signed: ", finalOrderSigned);
+
+    //Calling contract function
+    const tx = await contract.methods.offChainTrade(
+      /*finalOrderSigned.sell_amt,
+      finalOrderSigned.sell_token,
+      finalOrderSigned.buy_amt,
+      finalOrderSigned.buy_token,
+      finalOrderSigned.owner,
+      finalOrderSigned.signature,
+      finalOrderSigned.tradeData.takerToken,
+      finalOrderSigned.tradeData.takerSellAmt,
+      finalOrderSigned.tradeData.makerAddress,
+      finalOrderSigned.tradeData.makerToken,
+      finalOrderSigned.tradeData.makerBuyAmt,
+      finalOrderSigned.CENTRA_signature*/
+      finalOrder.orderData,
+      finalOrder.tradeData,
+      finalOrderSigned.CENTRA_signature
+    ).send({from: accounts[4]})
+     .catch(err => console.log(err));
+
+    console.log("tx recipt: ", tx);
+    
+    //END
+
+
     console.log(accounts[0])
     console.log(ADDRESS);
 
@@ -89,11 +165,14 @@ const init = async () =>{
     //const out1 = await getoffers(order1.buy_token,order1.sell_token,1);
     //console.log("orders: ", out1);
     
-    const output_orders = await matchOffers(order2);
-    console.log("ORDERS: ", output_orders);
+    //const output_orders = await matchOffers(order2);
+    //console.log("ORDERS: ", output_orders[0]);
+
+
+
     
     
-    //const order = await getOfferForHash(4);
+    //const order = await getOfferForHash(3);
     //console.log(order);
     //const o = await matchOffers(order3);
     //console.log("ORDERS: ",o);

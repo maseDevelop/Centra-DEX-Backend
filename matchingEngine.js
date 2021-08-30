@@ -15,11 +15,12 @@ const trade = async (maker,taker,quantity,paritalFill) =>{
         if(tradeAmount >= 0 ){
 
             const data = {
-                takerToken: taker.sell_token,
-                takerSellAmt: ToBigNum(tradeAmount),
-                makerAddress: maker.owner,
-                makerToken : maker.sell_token,
-                makerBuyAmt: ToBigNum(maker.buy_amt),
+                taker_address : taker.owner, 
+                taker_token: taker.sell_token,
+                taker_sell_amt: ToBigNum(tradeAmount),
+                maker_address: maker.owner,
+                maker_token : maker.sell_token,
+                maker_buy_amt: ToBigNum(maker.buy_amt),
             } 
             
             //Updating order data
@@ -31,7 +32,7 @@ const trade = async (maker,taker,quantity,paritalFill) =>{
 
             const [order] = await getOfferForHash(maker.id);
             
-            let tradeData = {...order, ...{tradeData : data}};
+            let tradeData = {...{orderData : order}, ...{tradeData : data}};
 
             //Sign the data
             tradeData = await signOrder(tradeData);
@@ -50,11 +51,12 @@ const trade = async (maker,taker,quantity,paritalFill) =>{
         if(tradeAmount >= 0 ){
 
             const data = {
-                takerToken: taker.sell_token,
-                takerSellAmt: ToBigNum(taker.sell_amt),
-                makerAddress: maker.owner,
-                makerToken: maker.sell_token,
-                makerBuyAmt: ToBigNum(tradeAmount),
+                taker_address : taker.owner, 
+                taker_token: taker.sell_token,
+                taker_sell_amt: ToBigNum(taker.sell_amt),
+                maker_address: maker.owner,
+                maker_token: maker.sell_token,
+                maker_buy_amt: ToBigNum(tradeAmount),
             }
 
             const newSellAmt = maker.sell_amt - quantity;
@@ -66,7 +68,7 @@ const trade = async (maker,taker,quantity,paritalFill) =>{
 
             const [order] = await getOfferForHash(maker.id);
 
-            let tradeData = {...order, ...{tradeData : data}};
+            let tradeData = {...{orderData : order}, ...{tradeData : data}};
 
             //Sign the data
             tradeData = await signOrder(tradeData);
