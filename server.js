@@ -46,6 +46,10 @@ contract.events.Withdraw()
   console.log(error);
 });
 
+contract.events.TradeSettled()
+.on('data', (event) => {
+  
+})
 
 //Websocket connections
 io.on('connection', (socket) => {
