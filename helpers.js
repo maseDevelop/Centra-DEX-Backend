@@ -56,17 +56,17 @@ const checkOrderSignature = async (dataThatWasSigned, signature, owner) =>{
  */
 const signOrder = async (data) => {
 
-    console.log("data in: ", data);
     const hash = await provider.web3.utils.soliditySha3(
-        {t:'bytes',v: data.orderData.signature},
+        {t:'bytes',v: data.signature},
+        {t:'uint256',v: data.tradeData.taker_order_id},
         {t:'address',v: data.tradeData.taker_address},
         {t:'address',v: data.tradeData.taker_token},
         {t:'uint256',v: data.tradeData.taker_sell_amt},
+        {t:'uint256',v: data.tradeData.maker_order_id},
         {t:'address',v: data.tradeData.maker_address},
         {t:'address',v: data.tradeData.maker_token},
         {t:'uint256',v: data.tradeData.maker_buy_amt}
     )
-    console.log("hash: ", hash);
    
    //Sign order with CENTRA DEX key
     const signedOrder = await provider.web3.eth.accounts.sign(hash, String(process.env.CENTRADEXPRIVATEKEY));

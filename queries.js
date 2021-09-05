@@ -15,14 +15,44 @@ const pool = new Pool({
 const changeUserBalance = (address, token_balance, balance) => {
   return new Promise((resolve) => {
     pool.query(
-      'INSERT INTO user_balance(address,token_address,balance) VALUES($1,$2,$3) RETURNING id, address, token_address, balance',
+      `INSERT INTO user_balance(address,token_address,balance) VALUES($1,$2,$3)
+      ON CONFLICT (address,token_address) DO UPDATE SET balance = $3`,
       [address, token_balance, balance],
       (error, results) => {
         if (error) {
           throw error;
         }
-        resolve(results.rows);
-      }
+        resolve(results.rows); }
+    );
+  });
+};
+
+const incrementUserBalance = (address, token_balance, value) => {
+  return new Promise((resolve) => {
+    pool.query(
+      `INSERT INTO user_balance(address,token_address,balance) VALUES($1,$2,$3)
+      ON CONFLICT (address,token_address) DO user_balance UPDATE SET balance = user_balance.balance + $3`,
+      [address, token_balance, value],
+      (error, results) => {
+        if (error) {
+          throw error;
+        }
+        resolve(results.rows); }
+    );
+  });
+};
+
+const decrementUserBalance = (address, token_balance, value) => {
+  return new Promise((resolve) => {
+    pool.query(
+      `INSERT INTO user_balance(address,token_address,balance) VALUES($1,$2,$3)
+      ON CONFLICT (address,token_address) DO user_balance UPDATE SET balance = user_balance.balance - $3`,
+      [address, token_balance, value],
+      (error, results) => {
+        if (error) {
+          throw error;
+        }
+        resolve(results.rows); }
     );
   });
 };
@@ -59,7 +89,7 @@ const tradeBalances = (taker_order_id, taker_address, taker_token, taker_sell_am
     pool.query('BEGIN');
     //Removing token from taker
     pool.query(
-      `UPDATE user_balance SET balance = balance - $1 WHERE address = $2 AND token_address = $3`,
+      `UPDATE user_balance SET balance = user_balance.balance - $1 WHERE address = $2 AND token_address = $3`,
       [taker_sell_amt, taker_address, taker_token],
       (error, results) => {
         if (error) {
@@ -71,7 +101,7 @@ const tradeBalances = (taker_order_id, taker_address, taker_token, taker_sell_am
 
     //Removing token from maker
     pool.query(
-      `UPDATE user_balance SET balance = balance - $1 WHERE address = $2 AND token_address = $3`,
+      `UPDATE user_balance SET balance = user_balance.balance - $1 WHERE address = $2 AND token_address = $3`,
       [maker_buy_amt, maker_address, maker_token],
       (error, results) => {
         if (error) {
@@ -83,8 +113,8 @@ const tradeBalances = (taker_order_id, taker_address, taker_token, taker_sell_am
     
     //Add token to the makers balance
       pool.query(
-      `UPDATE user_balance SET balance = balance + $1 WHERE address = $2 AND token_address = $3`,
-      [maker_buy_amt, taker_address, taker_token],
+      `INSERT INTO user_balance(address,token_address,balance) VALUES($1,$2,$3) ON CONFLICT (address,token_address) DO UPDATE SET balance = user_balance.balance + $3`,
+      [taker_address, maker_token, maker_buy_amt],
       (error, results) => {
         if (error) {
           throw error;
@@ -95,8 +125,8 @@ const tradeBalances = (taker_order_id, taker_address, taker_token, taker_sell_am
 
     //Add token to the takers balance
     pool.query(
-      `UPDATE user_balance SET balance = balance + $1 WHERE address = $2 AND token_address = $3`,
-      [taker_sell_amt, maker_address, maker_token],
+      `INSERT INTO user_balance(address,token_address,balance) VALUES($1,$2,$3) ON CONFLICT (address,token_address) DO UPDATE SET balance = user_balance.balance + $3`,
+      [maker_address, taker_token, taker_sell_amt],
       (error, results) => {
         if (error) {
           throw error;
@@ -208,5 +238,7 @@ module.exports = {
   getOffer,
   getOfferForHash,
   tradeBalances,
+  decrementUserBalance,
+  incrementUserBalance,
 }
 

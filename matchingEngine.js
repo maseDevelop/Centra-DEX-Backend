@@ -15,9 +15,11 @@ const trade = async (maker,taker,quantity,paritalFill) =>{
         if(tradeAmount >= 0 ){
 
             const data = {
+                taker_order_id : taker.id,
                 taker_address : taker.owner, 
                 taker_token: taker.sell_token,
                 taker_sell_amt: ToBigNum(tradeAmount),
+                maker_order_id : maker.id,
                 maker_address: maker.owner,
                 maker_token : maker.sell_token,
                 maker_buy_amt: ToBigNum(maker.buy_amt),
@@ -31,8 +33,20 @@ const trade = async (maker,taker,quantity,paritalFill) =>{
             const two = await updateOffer(taker.id,newSellAmt,newBuyAmt);//updating taker order
 
             const [order] = await getOfferForHash(maker.id);
-            
-            let tradeData = {...{orderData : order}, ...{tradeData : data}};
+
+            let tradeData = {
+                ...{orderData : {
+                    sell_amt : order.sell_amt,
+                    sell_token : order.sell_token,
+                    buy_amt :  order.buy_amt,
+                    buy_token : order.buy_token,
+                    owner : order.owner
+                    }
+                },
+                signature : order.signature,
+                ...{tradeData : data}
+            }
+            //let tradeData = {...{orderData : order}, ...{tradeData : data}};
 
             //Sign the data
             tradeData = await signOrder(tradeData);
@@ -51,14 +65,17 @@ const trade = async (maker,taker,quantity,paritalFill) =>{
         if(tradeAmount >= 0 ){
 
             const data = {
+                taker_order_id : taker.id,
                 taker_address : taker.owner, 
                 taker_token: taker.sell_token,
                 taker_sell_amt: ToBigNum(taker.sell_amt),
+                maker_order_id : maker.id,
                 maker_address: maker.owner,
                 maker_token: maker.sell_token,
                 maker_buy_amt: ToBigNum(tradeAmount),
             }
 
+            console.log(data)
             const newSellAmt = maker.sell_amt - quantity;
             const newBuyAmt = maker.buy_amt - tradeAmount;
 
@@ -68,10 +85,26 @@ const trade = async (maker,taker,quantity,paritalFill) =>{
 
             const [order] = await getOfferForHash(maker.id);
 
-            let tradeData = {...{orderData : order}, ...{tradeData : data}};
+            let tradeData = {
+                ...{orderData : {
+                    sell_amt : order.sell_amt,
+                    sell_token : order.sell_token,
+                    buy_amt :  order.buy_amt,
+                    buy_token : order.buy_token,
+                    owner : order.owner
+                    }
+                },
+                signature : order.signature,
+                ...{tradeData : data}
+            }
+            //let tradeData = {...{orderData : order}, ...{tradeData : data}};
+            
+            console.log(tradeData);
 
             //Sign the data
             tradeData = await signOrder(tradeData);
+
+            console.log("end: ", tradeData);
 
             return tradeData;
         }
@@ -127,6 +160,7 @@ const matchOffers = async (order) => {
             offerFilled = true;
         }
     }
+    console.log("trade_data: ", trade_data_arr);
     return trade_data_arr;
 };
 
