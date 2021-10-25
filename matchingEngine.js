@@ -3,13 +3,21 @@ const {getOffers, makeOffer, updateOffer, getOffer, getOfferForHash} = require('
 const {GetPrice, ToBigNum, signOrder } = require('./helpers');
 require('dotenv').config();
 
+/**
+ * 
+ * @param {*} maker the maker object
+ * @param {*} taker the taker object
+ * @param {*} quantity the amount of the order that is being filled
+ * @param {*} paritalFill boolean value stating wheather it is a partail fill
+ * @returns 
+ */
 const trade = async (maker,taker,quantity,paritalFill) =>{
 
     //Need to set the ID of the maker
 
     if(paritalFill){
 
-        //working out trade amount
+        //Working out trade amount
         const tradeAmount = (quantity * taker.buy_amt)/taker.sell_amt;
 
         if(tradeAmount >= 0 ){
@@ -75,7 +83,6 @@ const trade = async (maker,taker,quantity,paritalFill) =>{
                 maker_buy_amt: ToBigNum(tradeAmount),
             }
 
-            console.log(data)
             const newSellAmt = maker.sell_amt - quantity;
             const newBuyAmt = maker.buy_amt - tradeAmount;
 
@@ -99,12 +106,8 @@ const trade = async (maker,taker,quantity,paritalFill) =>{
             }
             //let tradeData = {...{orderData : order}, ...{tradeData : data}};
             
-            console.log(tradeData);
-
             //Sign the data
             tradeData = await signOrder(tradeData);
-
-            console.log("end: ", tradeData);
 
             return tradeData;
         }
@@ -114,6 +117,11 @@ const trade = async (maker,taker,quantity,paritalFill) =>{
     }
 }
 
+/**
+ * Matches multiple offers
+ * @param {*} order the order object 
+ * @returns 
+ */
 const matchOffers = async (order) => {
 
     //Creating the offer first
@@ -160,10 +168,14 @@ const matchOffers = async (order) => {
             offerFilled = true;
         }
     }
-    console.log("trade_data: ", trade_data_arr);
     return trade_data_arr;
 };
 
+/**
+ * Matches one single offer
+ * @param {*} order the order object
+ * @param {*} id the id of the order
+ */
 const matchOffer = async (order,id) =>{
 
     //Creating the offer first
@@ -181,16 +193,15 @@ const matchOffer = async (order,id) =>{
     //Getting the order that they want to take
     const [makerOrder] = await getOffer(id);
 
+    //Calculating the order way 
     orderFillAmount = currentOrder.sell_amt - makerOrder.buy_amt;
 
     if(orderFillAmount > 0){
         //Partially filled order
-
         return await trade(makerOrder,currentOrder,makerOrder.buy_amt,true);
 
     }else{
         //Fully filled order
-
        return await trade(makerOrder,currentOrder,currentOrder.sell_amt,false);
     }
 }

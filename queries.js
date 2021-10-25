@@ -226,9 +226,6 @@ const getOffer = (id) => {
   });
 }
 
-
-
-
 module.exports = {
   changeUserBalance,
   makeOffer,

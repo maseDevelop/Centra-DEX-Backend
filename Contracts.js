@@ -2,9 +2,6 @@ const Provider = require('./Provider')
 
 const provider = new Provider()
 
-
-
-
 class Contract {
   constructor(abi,address) {
     this.abi = abi
