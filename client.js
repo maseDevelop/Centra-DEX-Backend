@@ -1,5 +1,5 @@
+//Simple Client - Used for testing
 var io = require('socket.io-client');
-
 const {GetPrice} = require('./helpers');
 var socket = io.connect("http://localhost:3000/", {
     reconnection: true
@@ -19,21 +19,10 @@ const order1 = {
     
 socket.on('connect', function () {
     console.log('connected to localhost:3000');
-    /*socket.on('clientEvent', function (data) {
-        console.log('message from the server:', data);
-        socket.emit('serverEvent', "thanks server! for sending '" + data + "'");
-    });*/
     
     socket.emit("MakeOffer", order1);
-    /*socket.emit("TakeOffer",1);
-    socket.emit("CancelOffer","CancelOffer");
-    socket.emit("DepositToken","DepositToken");
-    socket.emit("WithdrawToken","WithdrawToken");*/
-
+    
 });
-
-
-
     
 socket.on('ReturnedMakeOffer', (data) => {
 
