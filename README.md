@@ -7,5 +7,5 @@ This is the code for my COMPX520 Dissertation.
 
 This repository represents the off-chain component of the exchange system.
 
-RunScript.js is a file containing an example trade and is used for testing without a frontend, (given .env is populated with truffle accounts and the correct contract address)
+RunScript.js is a file containing an example trade.
 
