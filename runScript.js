@@ -121,10 +121,14 @@ const init = async () =>{
         {t:'address',v: orderData0.owner}
     );
     
+
+    //Account[1] hashes the transaction data and creates a digital signature for there order
     const account1Signature = await provider.web3.eth.accounts.sign(data1, process.env.ACCOUNT1PRIVATEKEY); 
 
     console.log("account 1 siangure : ",account1Signature.signature);
 
+
+    //Account[1] one sends and order object to the matching engine
     const order1 = {
       sell_amt : orderData1.sell_amt,
       sell_token : orderData1.sell_token,
@@ -137,11 +141,13 @@ const init = async () =>{
       lowest_sell_price : GetPrice(orderData1.buy_amt, orderData1.sell_amt)
     }
 
-    //matching Order
+    //The order and it is saved in the orderbook and because thier is a match teh data is returned back to the user
     const [out] =  await matchOffers(order1);
 
     console.log(out)
-    //Sending order to contract
+
+    //To complete the order, account[1] must send this out order info to the on-chain settlement function.
+    //From here it will make thre transaction happen and settle funds on the blockchain network
     const tx = await contract.methods.offChainTrade(
       out.orderData,
       out.signature,
